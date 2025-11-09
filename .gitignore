@@ -9,9 +9,9 @@ venv/
 ENV/
 .env
 
-# Data
-chroma_db/
-*.db
+# Data (not ignoreing yet)
+#chroma_db/
+#*.db
 
 # IDE
 .vscode/
