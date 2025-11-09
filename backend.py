@@ -67,7 +67,7 @@ async def recommend_assessments(request: RecommendRequest):
 
     try:
         # Get recommendations (5–10 results, already handled inside RAG)
-        recs = rag_engine.recommend(request.query, top_k=10)
+        recs = rag_engine.recommend(request.query)
 
         if not recs or len(recs) < 1:
             raise HTTPException(status_code=404, detail="No recommendations found")
