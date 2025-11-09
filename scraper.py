@@ -11,8 +11,7 @@ from typing import List, Dict
 import re
 import os
 
-
-max_pages = 3
+max_pages = 32
 
 class SHLScraper:
     def __init__(self):
@@ -35,7 +34,7 @@ class SHLScraper:
                 break
             
             print(f"Scraping catalog page {page}...")
-            url = f"{self.base_url}/solutions/products/product-catalog/?start={(page-1)*12}&type=1&type=1"
+            url = f"{self.base_url}/solutions/products/product-catalog/?start={(page-1)*12}&type=1"
             response = requests.get(url, timeout=15)
             
             if response.status_code != 200:
@@ -43,13 +42,20 @@ class SHLScraper:
                 break
 
             soup = BeautifulSoup(response.content, "html.parser")
-            # Locate the Individual Test Solutions table
+            
             tables = soup.find_all("table")
-            if not tables or len(tables) < 2:
-                print("No individual test table found.")
+            individual_table = None
+            for t in tables:
+                header_cell = t.find("th")
+                if header_cell and "Individual Test Solutions" in header_cell.get_text(strip=True):
+                    individual_table = t
+                    break
+                
+            if not individual_table:
+                print("No 'Individual Test Solutions' table found on this page.")
                 break
-            table = tables[-1]  # The last one is usually Individual Test Solutions
-            rows = table.find_all("tr")[1:]  # Skip header
+            
+            rows = individual_table.find_all("tr")[1:]  # Skip header row
 
             # Collect assessment links
             assessment_urls = []
@@ -128,16 +134,15 @@ class SHLScraper:
             if not test_type:
                 return None
 
-            # Skills
-            skills = self.extract_skills(description)
+            # Skills (commented because very few skills are described there)
+            #skills = self.extract_skills(description)
 
             return {
                 "name": name,
                 "url": url,
                 "description": description,
                 "test_type": test_type or "Unknown",
-                "duration": duration,
-                "skills": skills,
+                "duration": duration,                      # can add skill too
             }
 
         except Exception as e:

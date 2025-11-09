@@ -3,7 +3,7 @@
     "name": "Global Skills Development Report",
     "url": "https://www.shl.com/products/product-catalog/view/global-skills-development-report/",
     "description": "This report is designed to be given to individuals who have completed the Global Skills Assessment (GSA). With coverage across the Great 8 Domains, this measure of self-reported behaviors offers a complete overview of their current skills. Participants receive actionable tips on leveraging their top skill strengths and how they might develop their growth skills.",
-    "test_type": "C,P",
+    "test_type": "P,C",
     "duration": "Unknown",
     "skills": []
   },
@@ -79,6 +79,170 @@
     "description": "Multi-choice test that measures the knowledge on the concepts of ADO.NET architecture, components and data provider objects.",
     "test_type": "K",
     "duration": "Approximate Completion Time in minutes = 10",
+    "skills": []
+  },
+  {
+    "name": "Adobe Experience Manager (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/adobe-experience-manager-new/",
+    "description": "Multi-choice test that measures the knowledge of AEM components, templates, workflows, AEM collections, OSGi services and troubleshooting of AEM projects.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 17",
+    "skills": []
+  },
+  {
+    "name": "Adobe Photoshop CC",
+    "url": "https://www.shl.com/products/product-catalog/view/adobe-photoshop-cc/",
+    "description": "The Adobe Photoshop CC test measures knowledge of Adobe Photoshop CC. Designed for experienced users, this test covers the following topics: 3D, Color, File Management, Interface, Layers, Painting and Drawing, Retouch and Enhancements, Selection, Text, and Web.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 20",
+    "skills": [
+      "management"
+    ]
+  },
+  {
+    "name": "Aeronautical Engineering (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/aeronautical-engineering-new/",
+    "description": "Multi-choice test that measures the knowledge of flight mechanics, space dynamics, aerodynamics, structures and propulsion.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 10",
+    "skills": []
+  },
+  {
+    "name": "Aerospace Engineering (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/aerospace-engineering-new/",
+    "description": "Multi-choice test that measures the conceptual knowledge of aerodynamics, aircraft systems and instrumentation, flight dynamics, space dynamics and avionics.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 10",
+    "skills": []
+  },
+  {
+    "name": "Agile Software Development",
+    "url": "https://www.shl.com/products/product-catalog/view/agile-software-development/",
+    "description": "Multi-choice test that measures the knowledge of agile methodology, scrum, feature driven software development, incremental and iterative development and processes involved in agile software development.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 7 minutes",
+    "skills": []
+  },
+  {
+    "name": "Agile Testing (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/agile-testing-new/",
+    "description": "Multi-choice test that measures the knowledge of tools, techniques and processes involved in the Agile testing methodology.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 13",
+    "skills": []
+  },
+  {
+    "name": "AI Skills",
+    "url": "https://www.shl.com/products/product-catalog/view/ai-skills/",
+    "description": "The AI Skills assessment measures the skills that help candidates successfully leverage AI in their work.",
+    "test_type": "P",
+    "duration": "Approximate Completion Time in minutes = 16",
+    "skills": []
+  },
+  {
+    "name": "Amazon Web Services (AWS) Development (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/amazon-web-services-aws-development-new/",
+    "description": "Multi-choice test that measures the knowledge of AWS delivery process, monitoring, metrics, logging, security, validation and scalability.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 6",
+    "skills": []
+  },
+  {
+    "name": "Android Development (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/android-development-new/",
+    "description": "Multi-choice test that measures the knowledge of UI components for an Android device, services and alerts, animation and media apps, application components, security and testing.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 7",
+    "skills": []
+  },
+  {
+    "name": "Angular 6 (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/angular-6-new/",
+    "description": "Multi-choice test that measures the knowledge of the basic components and modules of Angular 6 and concepts like data binding, dependency injection, CRUD with HTTP, typescript, routing and navigation.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 11",
+    "skills": []
+  },
+  {
+    "name": "AngularJS (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/angularjs-new/",
+    "description": "Multi-choice test that measures the knowledge of AngularJS architecture, forms, directives, filters, controllers, routing and testing.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 9",
+    "skills": []
+  },
+  {
+    "name": "Apache Hadoop (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-hadoop-new/",
+    "description": "Multi-choice test that measures the knowledge of basic concepts of Hadoop, commands, HDFS and MapReduce.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 7",
+    "skills": []
+  },
+  {
+    "name": "Apache Hadoop Extensions (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-hadoop-extensions-new/",
+    "description": "Multi-choice test that measures the conceptual knowledge of Pig, Hive and HBase.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 9",
+    "skills": []
+  },
+  {
+    "name": "Apache HBase (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-hbase-new/",
+    "description": "Multi-choice test that measures the knowledge of HBase concepts such as CAP theorem, ACID properties, HBase client API, MapReduce integration, configuration and administration.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 5",
+    "skills": []
+  },
+  {
+    "name": "Apache Hive (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-hive-new/",
+    "description": "Multi-choice test that measures the knowledge of Hive architecture, datatypes, built-in functions, configurations, partitioning, bucketing and commands of Hive query language.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 5",
+    "skills": []
+  },
+  {
+    "name": "Apache Kafka (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-kafka-new/",
+    "description": "Multi-choice test that measures the knowledge of Apache Kafka architecture, components, clusters, performance tuning and advanced operations.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 6",
+    "skills": []
+  },
+  {
+    "name": "Apache Pig (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-pig-new/",
+    "description": "Multi-choice test that measures the knowledge of Pig architecture, built-in operators, built-in functions and commands in PigLatin.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 6",
+    "skills": []
+  },
+  {
+    "name": "Apache Spark (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/apache-spark-new/",
+    "description": "Multi-choice test that measures the knowledge of Apache Spark principles, RDD operations - actions and transformations, lineage graphs and lazy evaluation.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 8",
+    "skills": []
+  },
+  {
+    "name": "ASP .NET with C# (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/asp-net-with-c-new/",
+    "description": "Multi-choice test that measures the knowledge of .NET framework and controls, C# fundamentals, OOPs concepts and advanced topics such as data access components, state management and security services.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 13",
+    "skills": [
+      "management"
+    ]
+  },
+  {
+    "name": "ASP.NET 4.5",
+    "url": "https://www.shl.com/products/product-catalog/view/asp-net-4-5/",
+    "description": "The ASP.NET 4.5 test measures knowledge of programming in the ASP.NET environment. Designed for experienced developers, but an average performer in this role should pass this test. This test includes the following topics: .NET Framework, Client-Side Programming, Data Access, Enhanced Runtime Features, Portals, Services and Mobile, Security, Troubleshooting and Optimization, Web Applications, and Web Forms.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 30",
     "skills": []
   }
 ]
