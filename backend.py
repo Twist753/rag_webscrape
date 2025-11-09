@@ -4,10 +4,12 @@ FastAPI Backend for SHL Assessment Recommendation System
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List
 from rag_engine import AssessmentRAG
 import uvicorn
+import traceback
 
 # -----------------------------------------------------
 # Initialize FastAPI
@@ -26,12 +28,17 @@ app.add_middleware(
 # -----------------------------------------------------
 # Initialize RAG Engine (loads Chroma + Gemini)
 # -----------------------------------------------------
-rag_engine = AssessmentRAG()
+try:
+    rag_engine = AssessmentRAG()
+    print("✅ RAG Engine initialized successfully.")
+except Exception as e:
+    print("❌ Failed to initialize RAG Engine:", e)
+    rag_engine = None
+
 
 @app.on_event("startup")
 async def startup_event():
-    print("✅ Backend initialized successfully — Chroma collection connected.")
-    # If you ever want to rebuild ChromaDB from JSON, you can add that here.
+    print("Backend initialized successfully — Chroma collection connected.")
 
 
 # -----------------------------------------------------
@@ -39,6 +46,7 @@ async def startup_event():
 # -----------------------------------------------------
 class RecommendRequest(BaseModel):
     query: str
+
 
 class Assessment(BaseModel):
     name: str | None = None
@@ -49,24 +57,44 @@ class Assessment(BaseModel):
     description: str | None = None
     score: float | None = None
 
+
 class RecommendResponse(BaseModel):
     recommendations: List[Assessment]
 
 
+# -----------------------------------------------------
 # Health Check Endpoint
+# -----------------------------------------------------
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
 
-# Recommendation Endpoint
+# -----------------------------------------------------
+# Root Endpoint (for Render ping)
+# -----------------------------------------------------
+@app.get("/")
+async def root():
+    return {"message": "SHL Assessment Recommendation Backend is running."}
+
+
+# -----------------------------------------------------
+# Recommendation Endpoint (Safe version)
+# -----------------------------------------------------
 @app.post("/recommend", response_model=RecommendResponse)
 async def recommend_assessments(request: RecommendRequest):
     if not request.query or len(request.query.strip()) == 0:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
+    if rag_engine is None:
+        return JSONResponse(
+            status_code=503,
+            content={
+                "detail": "⚠ Recommendation service is initializing. Please try again in a few seconds."
+            },
+        )
+
     try:
-        # Get recommendations (5–10 results, already handled inside RAG)
         recs = rag_engine.recommend(request.query)
 
         if not recs or len(recs) < 1:
@@ -80,20 +108,43 @@ async def recommend_assessments(request: RecommendRequest):
                 duration=str(r.get("duration", "N/A")),
                 skills=r.get("skills", ""),
                 description=r.get("description", ""),
-                score=r.get("score", 0)
+                score=r.get("score", 0),
             )
             for r in recs
         ]
 
         return RecommendResponse(recommendations=formatted)
 
-    except Exception as e:
-        print(" ⚠ Error during recommendation:", e)
-        raise HTTPException(status_code=500, detail=str(e))
+    except TimeoutError:
+        print("⚠ Timeout: RAG pipeline took too long.")
+        return JSONResponse(
+            status_code=504,
+            content={
+                "detail": "⚠ The recommendation service is taking longer than expected. Please retry after a few seconds."
+            },
+        )
 
+    except ConnectionError:
+        print("⚠ Connection issue with RAG engine.")
+        return JSONResponse(
+            status_code=502,
+            content={
+                "detail": "⚠ The recommendation service is temporarily unreachable. Please try again soon."
+            },
+        )
+
+    except Exception as e:
+        print("⚠ Error during recommendation:", e)
+        traceback.print_exc()
+        return JSONResponse(
+            status_code=500,
+            content={
+                "detail": "The recommendation service encountered cold start issues(due to free tier deployment). Please try again later."
+            },
+        )
 
 # -----------------------------------------------------
 # Run server (for local testing)
 # -----------------------------------------------------
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend:app", host="0.0.0.0", port=8000, reload=True)
