@@ -3,146 +3,138 @@ import requests
 import json
 
 # --- Page Configuration ---
-# This should be the first Streamlit command
 st.set_page_config(
     page_title="SHL Assessment Recommender",
-    layout="wide" # 1. Changed from "centered" to "wide"
+    layout="wide" 
 )
 
 # --- Configuration ---
-# URL of your FastAPI backend.
-API_URL = "http://127.0.0.1:8000/recommend" # IMPORTANT: Change this to your Render URL when deployed
+API_URL = "https://rag-webscrape.onrender.com/recommend" 
 
 # --- Custom CSS Styling ---
 SHL_TEAL = "#00a99d"
 SHL_LIGHT_GREY = "#f4f4f4"
-OFF_WHITE = "#fafafa" # For background
-LIGHT_GREEN_FADE = "#a3dcbb" # 1. Your new vibrant color
+OFF_WHITE = "#fafafa" 
+LIGHT_GREEN_FADE = "#a3dcbb" 
 
 st.markdown(f"""
 <style>
-    /* --- 1. Background Gradient --- */
-    /* Targets the main app container.
-      This creates a fixed vertical gradient from off-white to a light green/teal.
-      !important is used to override Streamlit's default theme (light/dark mode).
-    */
-    .stApp {{
-        /* 1. Changed gradient to start 50% from the top */
-        background-image: linear-gradient(to bottom, {OFF_WHITE} 50%, {LIGHT_GREEN_FADE} 100%) !important;
-        background-attachment: fixed !important;
-        background-size: cover !important;
-        padding-bottom: 70px !important; /* 2. Added padding to bottom for fixed footer */
-    }}
-
-    /* --- 2. Header Styling --- */
-    .header {{
-        width: 100%;
-        padding: 10px 0;
-        margin-bottom: 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid #e0e0e0;
-    }}
-    .header-name {{
-        font-size: 1.6em; /* 2. Increased font size */
-        font-weight: bold;
-        color: #333;
-    }}
-    .header-links a {{
-        margin-left: 15px;
-        color: #555;
-        text-decoration: none;
-        font-size: 1.1em; /* 2. Increased font size */
-    }}
-    .header-links a:hover {{
-        color: {SHL_TEAL};
-    }}
-    .header-links svg {{
-        width: 28px; /* Slightly larger icons */
-        height: 28px;
-        fill: currentColor; /* Allows color to be set by parent 'a' tag */
-    }}
-
-    /* --- 3. Footer Styling --- */
-    .footer {{
-        width: 100%;
-        text-align: center;
-        padding: 20px 0 10px 0;
-        font-size: 0.9em;
-        color: #888;
-        border-top: 1px solid #e0e0e0;
-        
-        /* 2. Added styles for fixed footer */
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background-color: {OFF_WHITE}; /* Give it a solid background */
-        z-index: 100;
-    }}
-
-    /* --- Original Styles --- */
-    /* Title color */
-    h1 {{
-        color: {SHL_TEAL};
-    }}
-
-    /* 2. Target st.subheader */
-    h2 {{
-        font-size: 1.75rem !important;
-    }}
-
-    /* Streamlit Button */
-    .stButton > button {{
-        background-color: {SHL_TEAL};
-        color: #ffffff;
-        border: none;
-        border-radius: 8px;
-        padding: 10px 20px;
-        font-weight: bold;
-        font-size: 1.05em; /* 2. Increased font size */
-    }}
-    .stButton > button:hover {{
-        background-color: #007a70; /* A darker teal for hover */
-        color: #ffffff;
-    }}
-
-    /* --- Custom Recommendation Card --- */
-    .card {{
-        background-color: {SHL_LIGHT_GREY};
-        border-radius: 10px;
-        padding: 18px;
-        margin-bottom: 12px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border: 1px solid #e0e0e0;
-    }}
-    .card-title {{
-        font-size: 1.25em; /* 2. Increased font size */
-        font-weight: bold;
-        color: #333333;
-        margin-bottom: 5px;
-    }}
-    .card-details {{
-        font-size: 1.05em; /* 2. Increased font size */
-        color: #555555;
-        margin-bottom: 15px;
-    }}
-    .card-link a {{
-        color: {SHL_TEAL};
-        text-decoration: none;
-        font-weight: bold;
-        font-size: 1.05em; /* 2. Increased font size */
-    }}
-    .card-link a:hover {{
-        text-decoration: underline;
-    }}
+:root {{
+    color-scheme: light !important;
+}}
+html, body, [class*="stAppViewContainer"], [class*="stApp"], [class*="main"], .stMarkdown, .stTextInput, .stTextArea {{
+    background-color: {OFF_WHITE} !important;
+    color: #000000 !important;
+}}
+/* Force labels and text inputs to use dark text on light background */
+.stTextInput > div > div > input, 
+.stTextArea > div > textarea {{
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #cccccc !important;
+}}
+/* Title & subheaders stay black 🔧 */
+h1, h2, h3, label, .stMarkdown p {{
+    color: #000000 !important;
+}}
+/* --- 1. Background Gradient --- */
+.stApp {{
+    background-image: linear-gradient(to bottom, {OFF_WHITE} 50%, {LIGHT_GREEN_FADE} 100%) !important;
+    background-attachment: fixed !important;
+    background-size: cover !important;
+    padding-bottom: 70px !important;
+}}
+/* --- Header --- */
+.header {{
+    width: 100%;
+    padding: 10px 0;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}}
+.header-name {{
+    font-size: 1.6em;
+    font-weight: bold;
+    color: #000000 !important;
+}}
+.header-links a {{
+    margin-left: 15px;
+    color: #333333;
+    text-decoration: none;
+    font-size: 1.1em;
+}}
+.header-links a:hover {{
+    color: {SHL_TEAL};
+}}
+.header-links svg {{
+    width: 28px;
+    height: 28px;
+    fill: currentColor;
+}}
+/* --- Footer --- */
+.footer {{
+    width: 100%;
+    text-align: center;
+    padding: 20px 0 10px 0;
+    font-size: 0.9em;
+    color: #444;
+    border-top: 1px solid #e0e0e0;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: {OFF_WHITE};
+    z-index: 100;
+}}
+/* Buttons */
+.stButton > button {{
+    background-color: {SHL_TEAL};
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: bold;
+    font-size: 1.05em;
+}}
+.stButton > button:hover {{
+    background-color: #007a70;
+    color: #ffffff;
+}}
+/* Cards */
+.card {{
+    background-color: {SHL_LIGHT_GREY};
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e0e0e0;
+}}
+.card-title {{
+    font-size: 1.25em;
+    font-weight: bold;
+    color: #000000 !important;
+    margin-bottom: 5px;
+}}
+.card-details {{
+    font-size: 1.05em;
+    color: #333333 !important;
+    margin-bottom: 15px;
+}}
+.card-link a {{
+    color: {SHL_TEAL};
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1.05em;
+}}
+.card-link a:hover {{
+    text-decoration: underline;
+}}
 </style>
 """, unsafe_allow_html=True)
 
-# --- 2. Header ---
-# Using columns is tricky for full-width elements, so st.markdown is better.
-# SVGs for LinkedIn and GitHub are inlined for portability.
+# --- Header ---
 st.markdown("""
 <div class="header">
     <div class="header-name">Abhinav Tyagi - abhinavty753@gmail.com</div>
@@ -160,8 +152,6 @@ st.markdown("""
 
 # --- Frontend Application ---
 st.title("Assessment Recommendation System")
-
-# Use a text_area for longer inputs like Job Descriptions
 query = st.text_area(
     "Enter a job description or query:",
     placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'"
@@ -226,7 +216,7 @@ if st.button("Get Recommendations"):
             except Exception as e:
                 st.error(f"An unexpected error occurred: {e}")
 
-# --- 3. Footer ---
+# --- Footer ---
 st.markdown("""
 <div class="footer">
     SHL Assessment Recommender | Built with coffee ;)
