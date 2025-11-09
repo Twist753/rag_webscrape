@@ -1,10 +1,10 @@
 import streamlit as st
 import requests
 import json
+import time
 
 EXAMPLES = [
     """I am hiring for Java developers who can also collaborate effectively with my business teams. Looking for an assessment(s) that can be completed in 40 minutes.""",
-    
     """We're looking for a Marketing Manager who can drive Recro’s brand positioning, community growth, and overall marketing strategy to fuel business growth. The ideal candidate is a strategic thinker, an execution-focused leader, and an expert in building high-performing marketing teams.
 
 About Recro 
@@ -38,8 +38,7 @@ Experience in building a thriving developer or tech community is a plus.
 Open for flexible work timings as per target geographies.
 
 I have no bar on duration.""",
-
-"""ICICI Bank Assistant Admin, Experience required 0-2 years, test should be 30-40 mins long"""
+    """ICICI Bank Assistant Admin, Experience required 0-2 years, test should be 30-40 mins long"""
 ]
 
 if 'example_index' not in st.session_state:
@@ -57,15 +56,32 @@ def cycle_examples():
 
 st.set_page_config(
     page_title="SHL Assessment Recommender",
-    layout="wide" 
+    layout="wide"
 )
 
-API_URL = "https://rag-webscrape.onrender.com/recommend" 
+API_URL = "https://rag-webscrape.onrender.com/recommend"
 
 SHL_TEAL = "#00a99d"
 SHL_LIGHT_GREY = "#f4f4f4"
-OFF_WHITE = "#fafafa" 
-LIGHT_GREEN_FADE = "#a3dcbb" 
+OFF_WHITE = "#fafafa"
+LIGHT_GREEN_FADE = "#a3dcbb"
+
+def safe_api_request(payload, retries=2, delay=10):
+    for attempt in range(retries):
+        try:
+            response = requests.post(API_URL, json=payload, timeout=30)
+            if response.status_code == 200:
+                return response
+            elif response.status_code in [502, 504]:
+                time.sleep(delay)
+            else:
+                return response
+        except requests.exceptions.RequestException:
+            if attempt < retries - 1:
+                time.sleep(delay)
+            else:
+                raise
+    return None
 
 st.markdown(f"""
 <style>
@@ -184,7 +200,6 @@ h1, h2, h3, label, .stMarkdown p {{
 </style>
 """, unsafe_allow_html=True)
 
-# --- Header ---
 st.markdown("""
 <div class="header">
     <div class="header-name">Abhinav Tyagi - abhinavty753@gmail.com</div>
@@ -199,16 +214,15 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
 st.title("Assessment Recommendation System")
 
 query = st.text_area(
     "Enter a job description or query:",
     placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'",
-    key="query_input" 
+    key="query_input"
 )
 
-col1, col2, _ = st.columns([2, 1, 3]) 
+col1, col2, _ = st.columns([2, 1, 3])
 
 with col1:
     if st.button("Get Recommendations", use_container_width=True):
@@ -221,53 +235,36 @@ with col1:
         else:
             with st.spinner("Analyzing your query and finding assessments...(might take around 20-30s on first load)"):
                 try:
-                    payload = {"query": query} 
-                    response = requests.post(API_URL, json=payload)
-
-                    if response.status_code == 200:
+                    payload = {"query": query}
+                    response = safe_api_request(payload)
+                    if response and response.status_code == 200:
                         data = response.json()
                         st.session_state.recommendations = data.get("recommendations", [])
                         if not st.session_state.recommendations:
                             st.session_state.info_message = "No recommendations found for this query."
-                    
-                    elif response.status_code == 404:
+                    elif response and response.status_code == 404:
                         st.session_state.info_message = "No recommendations found for this query."
+                    elif not response:
+                        st.session_state.error_message = "Server did not respond. Please retry after a few seconds."
                     else:
-                        error_detail = "Unknown error"
-                        try:
-                            error_detail = response.json().get("detail", "Unknown error")
-                        except json.JSONDecodeError:
-                            error_detail = response.text
-                        st.session_state.error_message = f"Error from API: {error_detail} (Code: {response.status_code})"
-                
+                        st.session_state.error_message = f"Error from API: {response.text} (Code: {response.status_code})"
                 except requests.exceptions.ConnectionError:
-                    st.session_state.error_message = (
-                        "Connection Error: Could not connect to the backend API. "
-                        f"Is it running at `{API_URL}`?"
-                    )
+                    st.session_state.error_message = f"Connection Error: Could not connect to `{API_URL}`."
                 except Exception as e:
                     st.session_state.error_message = f"An unexpected error occurred: {e}"
 
 with col2:
-    st.button(
-        "Add Example", 
-        on_click=cycle_examples, 
-        use_container_width=True
-    )
+    st.button("Add Example", on_click=cycle_examples, use_container_width=True)
 
-# --- Results Rendering (Now outside the columns) ---
 if st.session_state.recommendations:
     recommendation_count = len(st.session_state.recommendations)
     st.subheader(f"Recommended Assessments ({recommendation_count})")
-    
     col1_rec, col2_rec, col3_rec = st.columns(3)
-    
     for index, rec in enumerate(st.session_state.recommendations):
         name = rec.get("name", "Name not available")
         url = rec.get("url", "URL not found")
-        duration = rec.get("duration", "N/A") 
+        duration = rec.get("duration", "N/A")
         test_type = rec.get("test_type", "N/A")
-
         card_html = f"""
         <div class="card">
             <div class="card-title">{name}</div>
@@ -279,22 +276,17 @@ if st.session_state.recommendations:
             </div>
         </div>
         """
-        
         if index % 3 == 0:
             col1_rec.markdown(card_html, unsafe_allow_html=True)
         elif index % 3 == 1:
             col2_rec.markdown(card_html, unsafe_allow_html=True)
         else:
             col3_rec.markdown(card_html, unsafe_allow_html=True)
-
 elif st.session_state.info_message:
     st.info(st.session_state.info_message)
-
 elif st.session_state.error_message:
     st.error(st.session_state.error_message)
 
-
-# --- Footer ---
 st.markdown("""
 <div class="footer">
     SHL Assessment Recommender | Built with coffee ;)
