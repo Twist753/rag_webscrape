@@ -95,7 +95,7 @@ if st.button("Get Recommendations"):
     if not query.strip():
         st.warning("Please enter a query or job description.")
     else:
-        with st.spinner("🧠 Analyzing your query and finding assessments..."):
+        with st.spinner("Analyzing your query and finding assessments..."):
             try:
                 # --- API Call ---
                 payload = {"query": query}
@@ -118,8 +118,8 @@ if st.button("Get Recommendations"):
                             # --- TODO: Update this when your backend sends more data ---
                             # These are placeholders until you update your backend.py
                             # to send this information from your RAG engine.
-                            duration = rec.get("duration", "N/A") 
-                            test_type = rec.get("test_type", "N/A")
+                            duration = rec.get("duration") 
+                            test_type = rec.get("test_type")
                             # -----------------------------------------------------------
 
                             # HTML for the custom card
@@ -127,10 +127,10 @@ if st.button("Get Recommendations"):
                             <div class="card">
                                 <div class="card-title">{name}</div>
                                 <div class="card-details">
-                                    {duration} | Test Type = {test_type}
+                                    Test Duration(min) = {duration} | Test Type = {test_type}
                                 </div>
                                 <div class="card-link">
-                                    <a href="{url}" target="_blank">View Assessment Details</a>
+                                    <a href="{url}" target="_blank">Link for Assessment</a>
                                 </div>
                             </div>
                             """

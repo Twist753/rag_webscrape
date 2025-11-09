@@ -188,6 +188,7 @@ class AssessmentRAG:
 
     # ----------- Recommend ------------
     def recommend(self, query: str, top_k: int = 10, min_k: int = 5) -> List[Dict]:
+        """Merged version: performs retrieval + re-ranking + formatting."""
         parsed, candidates = self.retrieve(query, n_results=60)
         if not candidates:
             return []
@@ -198,7 +199,7 @@ class AssessmentRAG:
         # --- Adaptive threshold ---
         scores = [c["score"] for c in candidates]
         avg_score = sum(scores[:15]) / max(1, len(scores[:15]))
-        cutoff = max(0.45, avg_score * 0.8)  # softer threshold, 80% of avg top-15
+        cutoff = max(0.45, avg_score * 0.8)
 
         filtered = [c for c in candidates if c["score"] >= cutoff]
 
@@ -251,17 +252,11 @@ class AssessmentRAG:
 
         # --- Final sanity ---
         filtered = sorted(filtered, key=lambda x: x.get("score", 0), reverse=True)[:top_k]
-        return filtered
 
-
-    # ---------- Format for Web Frontend ----------
-
-    def format_for_web(self, recommendations: List[Dict]) -> List[Dict]:
-        """Format output cleanly for API/Streamlit frontend."""
+        # --- Format output for web/backend ---
         formatted = []
-        for r in recommendations:
+        for r in filtered:
             skills_data = r.get("skills", [])
-            
             if isinstance(skills_data, str):
                 if "," in skills_data:
                     skills_data = [s.strip() for s in skills_data.split(",") if s.strip()]
@@ -271,13 +266,15 @@ class AssessmentRAG:
                 skills_data = []
 
             formatted.append({
-                "Assessment Name": r.get("name"),
-                "Type": r.get("test_type"),
-                "Duration (mins)": r.get("duration_mins"),
-                "Skills": ", ".join(skills_data),
-                "Description": (r.get("description") or "")[:200] + "...",
-                "URL": r.get("url")
+                "name": r.get("name"),
+                "test_type": r.get("test_type"),
+                "duration": r.get("duration_mins"),
+                "skills": ", ".join(skills_data),
+                "description": (r.get("description") or "")[:200] + "...",
+                "url": r.get("url"),
+                "score": r.get("score")
             })
+
         return formatted
 
 # ---------- CLI Test ----------
@@ -293,11 +290,8 @@ if __name__ == "__main__":
         print("\n" + "=" * 60)
         print("QUERY:", q)
         recs = rag.recommend(q, top_k=10)
-        formatted = rag.format_for_web(recs)
 
-        print(f"Returned {len(formatted)} recommendations:\n")
-        for i, item in enumerate(formatted, 1):
-            print(f"{i}. {item['Assessment Name']} ({item['Type']}) - {item['Duration (mins)']} mins")
-            print(f"   Skills: {item['Skills']}")
-            print(f"   URL: {item['URL']}\n")
+        print(f"Returned {len(recs)} recommendations:\n")
+        for i, item in enumerate(recs, 1):
+            print(f"{i}. {item['name']} - {item['url']} | duration = {item['duration']} | Test Type = {item['test_type']}")
         print("-" * 60)

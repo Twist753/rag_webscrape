@@ -41,24 +41,25 @@ class RecommendRequest(BaseModel):
     query: str
 
 class Assessment(BaseModel):
-    name: str
-    url: str
+    name: str | None = None
+    url: str | None = None
+    test_type: str | None = None
+    duration: str | None = None
+    skills: str | None = None
+    description: str | None = None
+    score: float | None = None
 
 class RecommendResponse(BaseModel):
     recommendations: List[Assessment]
 
 
-# -----------------------------------------------------
 # Health Check Endpoint
-# -----------------------------------------------------
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
 
-# -----------------------------------------------------
 # Recommendation Endpoint
-# -----------------------------------------------------
 @app.post("/recommend", response_model=RecommendResponse)
 async def recommend_assessments(request: RecommendRequest):
     if not request.query or len(request.query.strip()) == 0:
@@ -71,9 +72,16 @@ async def recommend_assessments(request: RecommendRequest):
         if not recs or len(recs) < 1:
             raise HTTPException(status_code=404, detail="No recommendations found")
 
-        # Convert to simple name + url response
         formatted = [
-            Assessment(name=r.get("name", "Unnamed"), url=r.get("url", ""))
+            Assessment(
+                name=r.get("name", "Unnamed"),
+                url=r.get("url", ""),
+                test_type=r.get("test_type", "N/A"),
+                duration=str(r.get("duration", "N/A")),
+                skills=r.get("skills", ""),
+                description=r.get("description", ""),
+                score=r.get("score", 0)
+            )
             for r in recs
         ]
 
