@@ -184,7 +184,6 @@ h1, h2, h3, label, .stMarkdown p {{
 </style>
 """, unsafe_allow_html=True)
 
-# --- Header ---
 st.markdown("""
 <div class="header">
     <div class="header-name">Abhinav Tyagi - abhinavty753@gmail.com</div>
@@ -255,7 +254,6 @@ with col2:
         use_container_width=True
     )
 
-# --- Results Rendering (Now outside the columns) ---
 if st.session_state.recommendations:
     recommendation_count = len(st.session_state.recommendations)
     st.subheader(f"Recommended Assessments ({recommendation_count})")
@@ -265,8 +263,8 @@ if st.session_state.recommendations:
     for index, rec in enumerate(st.session_state.recommendations):
         name = rec.get("name", "Name not available")
         url = rec.get("url", "URL not found")
-        duration = rec.get("duration", "N/A") 
-        test_type = rec.get("test_type", "N/A")
+        duration = rec.get("duration") or "N/A"
+        test_type = rec.get("test_type") or "N/A"
 
         card_html = f"""
         <div class="card">
@@ -294,7 +292,6 @@ elif st.session_state.error_message:
     st.error(st.session_state.error_message)
 
 
-# --- Footer ---
 st.markdown("""
 <div class="footer">
     SHL Assessment Recommender | Built with coffee ;)
