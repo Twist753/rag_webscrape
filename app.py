@@ -64,7 +64,6 @@ API_URL = "https://rag-webscrape.onrender.com/recommend"
 
 # --- Custom CSS Styling ---
 SHL_TEAL = "#00a99d"
-# ... (rest of CSS is unchanged) ...
 SHL_LIGHT_GREY = "#f4f4f4"
 OFF_WHITE = "#fafafa" 
 LIGHT_GREEN_FADE = "#a3dcbb" 
@@ -111,19 +110,12 @@ h1, h2, h3, label, .stMarkdown p {{
     padding-bottom: 70px !important;
 }}
 
-/* *** THE KEY FIX IS HERE ***
-  Streamlit puts content inside containers (like stAppViewContainer and main).
-  We must make THESE containers transparent so the .stApp gradient behind them shows through.
-*/
 [class*="stAppViewContainer"], [class*="main"] {{
     background: transparent !important; 
 }}
-/* --- END OF KEY FIX --- */
-
 
 .header {{
     width: 100%;
-# ... (rest of your CSS is unchanged) ...
     padding: 10px 0;
     margin-bottom: 20px;
     display: flex;
@@ -177,6 +169,8 @@ h1, h2, h3, label, .stMarkdown p {{
     background-color: #007a70;
     color: #ffffff;
 }}
+
+/* --- CARD STYLE CHANGES --- */
 .card {{
     background-color: {SHL_LIGHT_GREY};
     border-radius: 10px;
@@ -184,6 +178,7 @@ h1, h2, h3, label, .stMarkdown p {{
     margin-bottom: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border: 1px solid #e0e0e0;
+    height: 100%; /* <-- 1. ADDED THIS: Makes cards in a row the same height */
 }}
 .card-title {{
     font-size: 1.25em;
@@ -228,43 +223,45 @@ st.markdown("""
 st.title("Assessment Recommendation System")
 
 # 4. --- Updated Text Area ---
-# We add a 'key' here so the callback function can update its value
 query = st.text_area(
     "Enter a job description or query:",
     placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'",
-    key="query_input" # This key links to st.session_state.query_input
+    key="query_input" 
 )
 
 # 5. --- Button Layout ---
-# We create columns to place the buttons side-by-side
-# Ratios: 2 for main button, 1 for example button, 3 for empty spacer
 col1, col2, _ = st.columns([2, 1, 3]) 
 
 with col1:
     # 6. --- Main Button ---
-    # The logic inside this 'if' block is UNCHANGED.
-    # It now just sits inside a column.
     if st.button("Get Recommendations", use_container_width=True):
         if not query.strip():
             st.warning("Please enter a query or job description.")
         else:
-            with st.spinner("Analyzing your query and finding assessments..."):
+            with st.spinner("Analyzing your query and finding assessments...(might take around 20-30s on first load)"):
                 try:
                     # --- API Call ---
-                    payload = {"query": query} # 'query' var still works!
+                    payload = {"query": query} 
                     response = requests.post(API_URL, json=payload)
 
                     if response.status_code == 200:
                         data = response.json()
                         recommendations = data.get("recommendations", [])
+                        
+                        # --- CHANGE 1: GET RECOMMENDATION COUNT ---
+                        recommendation_count = len(recommendations)
 
                         if not recommendations:
                             st.info("No recommendations found for this query.")
                         else:
-                            st.subheader("Recommended Assessments")
+                            # --- CHANGE 1: DISPLAY COUNT IN SUBHEADER ---
+                            st.subheader(f"Recommended Assessments ({recommendation_count})")
+                            
+                            # --- CHANGE 2: CREATE 3 COLUMNS FOR CARDS ---
+                            col1_rec, col2_rec, col3_rec = st.columns(3)
                             
                             # Loop over recommendations and display in custom cards
-                            for rec in recommendations:
+                            for index, rec in enumerate(recommendations):
                                 name = rec.get("name", "Name not available")
                                 url = rec.get("url", "URL not found")
                                 duration = rec.get("duration", "N/A") 
@@ -282,7 +279,14 @@ with col1:
                                     </div>
                                 </div>
                                 """
-                                st.markdown(card_html, unsafe_allow_html=True)
+                                
+                                # --- CHANGE 2: PLACE CARD IN CORRECT COLUMN ---
+                                if index % 3 == 0:
+                                    col1_rec.markdown(card_html, unsafe_allow_html=True)
+                                elif index % 3 == 1:
+                                    col2_rec.markdown(card_html, unsafe_allow_html=True)
+                                else:
+                                    col3_rec.markdown(card_html, unsafe_allow_html=True)
                     
                     elif response.status_code == 404:
                         st.info("No recommendations found for this query.")
@@ -305,7 +309,6 @@ with col1:
 
 with col2:
     # 7. --- "Add Example" Button ---
-    # This button calls the 'cycle_examples' function when clicked
     st.button(
         "Add Example", 
         on_click=cycle_examples, 
