@@ -1,0 +1,84 @@
+[
+  {
+    "name": "Global Skills Development Report",
+    "url": "https://www.shl.com/products/product-catalog/view/global-skills-development-report/",
+    "description": "This report is designed to be given to individuals who have completed the Global Skills Assessment (GSA). With coverage across the Great 8 Domains, this measure of self-reported behaviors offers a complete overview of their current skills. Participants receive actionable tips on leveraging their top skill strengths and how they might develop their growth skills.",
+    "test_type": "C,P",
+    "duration": "Unknown",
+    "skills": []
+  },
+  {
+    "name": ".NET Framework 4.5",
+    "url": "https://www.shl.com/products/product-catalog/view/net-framework-4-5/",
+    "description": "The.NET Framework 4.5 test measures knowledge of .NET environment. Designed for experienced users, this test covers the following topics: Application Development, Application Foundation, Data Modeling, Deployment, Diagnostics, Performance, Portability, and Security.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 30",
+    "skills": []
+  },
+  {
+    "name": ".NET MVC (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/net-mvc-new/",
+    "description": "Multi-choice test that measures the knowledge of Model-View-Controller (MVC) architecture, validation, security, routing, and areas.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 17",
+    "skills": []
+  },
+  {
+    "name": ".NET MVVM (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/net-mvvm-new/",
+    "description": "Multi-choice test that measures the knowledge of MVVM pattern, scenarios, data validation, ViewModel communication and Quick-start.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 5",
+    "skills": [
+      "communication"
+    ]
+  },
+  {
+    "name": ".NET WCF (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/net-wcf-new/",
+    "description": "Multi-choice test that measures the knowledge of .NET fundamentals, WCF architecture, programming model, SOA, managing and programming WCF.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 11",
+    "skills": []
+  },
+  {
+    "name": ".NET WPF (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/net-wpf-new/",
+    "description": "Multi-choice test that measures the knowledge of .NET basics, WPF, XAML controls, events, layouts, working with WPF windows/menus and deploying WPF applications.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 9",
+    "skills": []
+  },
+  {
+    "name": ".NET XAML (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/net-xaml-new/",
+    "description": "Multi-choice test that measures the knowledge of XAML triggers, data binding, custom controls and layouts.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 5",
+    "skills": []
+  },
+  {
+    "name": "Accounts Payable (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/accounts-payable-new/",
+    "description": "Multiple-choice test that measures the knowledge of processing payables and vendor invoices, and the posting of journal entries.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 9",
+    "skills": []
+  },
+  {
+    "name": "Accounts Receivable (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/accounts-receivable-new/",
+    "description": "Multiple-choice test that measures the knowledge of processing receivables and invoices.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 13",
+    "skills": []
+  },
+  {
+    "name": "ADO.NET (New)",
+    "url": "https://www.shl.com/products/product-catalog/view/ado-net-new/",
+    "description": "Multi-choice test that measures the knowledge on the concepts of ADO.NET architecture, components and data provider objects.",
+    "test_type": "K",
+    "duration": "Approximate Completion Time in minutes = 10",
+    "skills": []
+  }
+]
