@@ -3,7 +3,6 @@ import requests
 import json
 
 # 1. --- Examples List ---
-# Store the examples you provided
 EXAMPLES = [
     """I am hiring for Java developers who can also collaborate effectively with my business teams. Looking for an assessment(s) that can be completed in 40 minutes.""",
     
@@ -50,13 +49,8 @@ if 'example_index' not in st.session_state:
     st.session_state.example_index = 0
 
 # 3. --- Callback Function ---
-# This function runs when the "Add Example" button is clicked
 def cycle_examples():
-    # Set the text area's content to the *current* example
-    # We use a 'key' ("query_input") on the text_area to set its value
     st.session_state.query_input = EXAMPLES[st.session_state.example_index]
-    
-    # Increment and wrap the index for the *next* click
     st.session_state.example_index = (st.session_state.example_index + 1) % len(EXAMPLES)
 
 # --- Page Configuration ---
@@ -66,7 +60,7 @@ st.set_page_config(
 )
 
 # --- Configuration ---
-API_URL = "https.rag-webscrape.onrender.com/recommend" 
+API_URL = "https://rag-webscrape.onrender.com/recommend" 
 
 # --- Custom CSS Styling ---
 SHL_TEAL = "#00a99d"
