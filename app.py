@@ -22,29 +22,38 @@ st.markdown(f"""
 :root {{
     color-scheme: light !important;
 }}
-html, body, [class*="stAppViewContainer"], [class*="stApp"], [class*="main"], .stMarkdown, .stTextInput, .stTextArea {{
+
+html, body {{
     background-color: {OFF_WHITE} !important;
     color: #000000 !important;
 }}
-/* Force labels and text inputs to use dark text on light background */
+
+h1, h2, h3, label, .stMarkdown p {{
+    color: #000000 !important;
+}}
+
 .stTextInput > div > div > input, 
 .stTextArea > div > textarea {{
     background-color: #ffffff !important;
     color: #000000 !important;
     border: 1px solid #cccccc !important;
 }}
-/* Title & subheaders stay black 🔧 */
-h1, h2, h3, label, .stMarkdown p {{
-    color: #000000 !important;
-}}
-/* --- 1. Background Gradient --- */
 .stApp {{
     background-image: linear-gradient(to bottom, {OFF_WHITE} 50%, {LIGHT_GREEN_FADE} 100%) !important;
     background-attachment: fixed !important;
     background-size: cover !important;
     padding-bottom: 70px !important;
 }}
-/* --- Header --- */
+
+  Streamlit puts content inside containers (like stAppViewContainer and main).
+  We must make THESE containers transparent so the .stApp gradient behind them shows through.
+*/
+[class*="stAppViewContainer"], [class*="main"] {{
+    background: transparent !important; 
+}}
+
+
+
 .header {{
     width: 100%;
     padding: 10px 0;
@@ -73,7 +82,6 @@ h1, h2, h3, label, .stMarkdown p {{
     height: 28px;
     fill: currentColor;
 }}
-/* --- Footer --- */
 .footer {{
     width: 100%;
     text-align: center;
@@ -88,7 +96,6 @@ h1, h2, h3, label, .stMarkdown p {{
     background-color: {OFF_WHITE};
     z-index: 100;
 }}
-/* Buttons */
 .stButton > button {{
     background-color: {SHL_TEAL};
     color: #ffffff;
@@ -102,7 +109,6 @@ h1, h2, h3, label, .stMarkdown p {{
     background-color: #007a70;
     color: #ffffff;
 }}
-/* Cards */
 .card {{
     background-color: {SHL_LIGHT_GREY};
     border-radius: 10px;
@@ -138,6 +144,7 @@ h1, h2, h3, label, .stMarkdown p {{
 st.markdown("""
 <div class="header">
     <div class="header-name">Abhinav Tyagi - abhinavty753@gmail.com</div>
+# ... (rest of your app is unchanged) ...
     <div class="header-links">
         <a href="https://www.linkedin.com/in/abhinav-tyagi-73373b281/" target="_blank">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
