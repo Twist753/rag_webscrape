@@ -7,4 +7,5 @@ sentence-transformers==5.1.2
 pandas==2.3.3
 python-dotenv==1.2.1
 tabulate
+google-generativeai
 #streamlit
