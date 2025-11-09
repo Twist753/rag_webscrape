@@ -190,44 +190,44 @@ class AssessmentRAG:
         parsed, candidates = self.retrieve(query, n_results=60)
         if not candidates:
             return []
-    
-        # Sort once by score (desc)
+
+        # Sort by similarity descending
         candidates = sorted(candidates, key=lambda x: x.get("score", 0), reverse=True)
-    
-        # --- Adaptive cutoff ---
-        # Use the top 20 to estimate a good threshold.
-        top_pool = candidates[:20]
-        if not top_pool:
-            return []
-    
-        # Score at rank 10 (or last if fewer) minus a small margin,
-        # but never below a floor of 0.55
-        rank_for_cut = min(9, len(top_pool) - 1)
-        score_at_rank = top_pool[rank_for_cut].get("score", 0)
-        adaptive_cutoff = max(0.55, score_at_rank - 0.05)
-    
-        filtered = [c for c in candidates if c.get("score", 0) >= adaptive_cutoff]
-    
-        # Ensure at least min_k
+
+        # --- Adaptive threshold ---
+        scores = [c["score"] for c in candidates]
+        avg_score = sum(scores[:15]) / max(1, len(scores[:15]))
+        cutoff = max(0.45, avg_score * 0.8)  # softer threshold, 80% of avg top-15
+
+        filtered = [c for c in candidates if c["score"] >= cutoff]
+
+        # --- Ensure count between 5 and 10 ---
         if len(filtered) < min_k:
             filtered = candidates[:min_k]
-    
-        # Cap at top_k (this already biases toward ~10 if quality allows)
-        shortlisted = filtered[:top_k]
-    
-        # --- Balance across requested test types if present ---
+        elif len(filtered) > top_k:
+            filtered = filtered[:top_k]
+
+        # --- If still <10 but next few are close in score, include them ---
+        if len(filtered) < top_k and len(candidates) > len(filtered):
+            tail_candidates = candidates[len(filtered):len(filtered)+5]
+            for c in tail_candidates:
+                if abs(c["score"] - filtered[-1]["score"]) < 0.05:
+                    filtered.append(c)
+                if len(filtered) >= top_k:
+                    break
+
+        # --- Balance across test types if specified ---
         requested_types = parsed.get("test_types_needed") or []
         requested_types = [t for t in requested_types if t in ["K", "P", "C"]]
-    
+
         if requested_types:
             by_type = {"K": [], "P": [], "C": []}
-            for c in shortlisted:
+            for c in filtered:
                 t = (c.get("test_type") or "").upper()
                 by_type[t if t in by_type else "other"].append(c)
-    
+
             balanced = []
-            # Round-robin pull respecting requested types first, then fill with others
-            while len(balanced) < min(top_k, len(shortlisted)):
+            while len(balanced) < top_k:
                 any_added = False
                 for t in requested_types:
                     if by_type[t]:
@@ -238,8 +238,7 @@ class AssessmentRAG:
                 if len(balanced) >= top_k:
                     break
                 if not any_added:
-                    # Fill from remaining buckets
-                    for t in ["K", "P", "C", "other"]:
+                    for t in ["K", "P", "C"]:
                         if by_type[t]:
                             balanced.append(by_type[t].pop(0))
                             any_added = True
@@ -247,10 +246,12 @@ class AssessmentRAG:
                                 break
                 if not any_added:
                     break
-                
-            shortlisted = balanced
-    
-        return shortlisted[:top_k]
+            filtered = balanced
+
+        # --- Final sanity ---
+        filtered = sorted(filtered, key=lambda x: x.get("score", 0), reverse=True)[:top_k]
+        return filtered
+
 
     # ---------- Format for Web Frontend ----------
 
