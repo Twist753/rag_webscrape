@@ -185,32 +185,49 @@ class AssessmentRAG:
             })
         return parsed, candidates
 
-    # ---------- Recommend ----------
+    # ----------- Recommend ------------
     def recommend(self, query: str, top_k: int = 10, min_k: int = 5) -> List[Dict]:
-        parsed, candidates = self.retrieve(query, n_results=40)
+        parsed, candidates = self.retrieve(query, n_results=60)
         if not candidates:
             return []
-
-        # Filter good matches first
-        filtered = [c for c in candidates if c["score"] > 0.6]
+    
+        # Sort once by score (desc)
+        candidates = sorted(candidates, key=lambda x: x.get("score", 0), reverse=True)
+    
+        # --- Adaptive cutoff ---
+        # Use the top 20 to estimate a good threshold.
+        top_pool = candidates[:20]
+        if not top_pool:
+            return []
+    
+        # Score at rank 10 (or last if fewer) minus a small margin,
+        # but never below a floor of 0.55
+        rank_for_cut = min(9, len(top_pool) - 1)
+        score_at_rank = top_pool[rank_for_cut].get("score", 0)
+        adaptive_cutoff = max(0.55, score_at_rank - 0.05)
+    
+        filtered = [c for c in candidates if c.get("score", 0) >= adaptive_cutoff]
+    
+        # Ensure at least min_k
         if len(filtered) < min_k:
-            filtered = sorted(candidates, key=lambda x: x["score"], reverse=True)[:max(min_k, len(filtered))]
-
-        candidates = filtered[:top_k]
-
-        # Balance across test types
+            filtered = candidates[:min_k]
+    
+        # Cap at top_k (this already biases toward ~10 if quality allows)
+        shortlisted = filtered[:top_k]
+    
+        # --- Balance across requested test types if present ---
         requested_types = parsed.get("test_types_needed") or []
+        requested_types = [t for t in requested_types if t in ["K", "P", "C"]]
+    
         if requested_types:
-            by_type = {"K": [], "P": [], "C": [], "other": []}
-            for c in candidates:
+            by_type = {"K": [], "P": [], "C": []}
+            for c in shortlisted:
                 t = (c.get("test_type") or "").upper()
-                if t in by_type:
-                    by_type[t].append(c)
-                else:
-                    by_type["other"].append(c)
-
+                by_type[t if t in by_type else "other"].append(c)
+    
             balanced = []
-            while len(balanced) < top_k:
+            # Round-robin pull respecting requested types first, then fill with others
+            while len(balanced) < min(top_k, len(shortlisted)):
                 any_added = False
                 for t in requested_types:
                     if by_type[t]:
@@ -218,20 +235,24 @@ class AssessmentRAG:
                         any_added = True
                         if len(balanced) >= top_k:
                             break
+                if len(balanced) >= top_k:
+                    break
                 if not any_added:
-                    for k in by_type:
-                        if by_type[k]:
-                            balanced.append(by_type[k].pop(0))
+                    # Fill from remaining buckets
+                    for t in ["K", "P", "C", "other"]:
+                        if by_type[t]:
+                            balanced.append(by_type[t].pop(0))
                             any_added = True
                             if len(balanced) >= top_k:
                                 break
                 if not any_added:
                     break
-            candidates = balanced
+                
+            shortlisted = balanced
+    
+        return shortlisted[:top_k]
 
-        return candidates[:top_k]
-
-        # ---------- Format for Web Frontend ----------
+    # ---------- Format for Web Frontend ----------
 
     def format_for_web(self, recommendations: List[Dict]) -> List[Dict]:
         """Format output cleanly for API/Streamlit frontend."""
