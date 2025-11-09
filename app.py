@@ -2,6 +2,63 @@ import streamlit as st
 import requests
 import json
 
+# 1. --- Examples List ---
+# Store the examples you provided
+EXAMPLES = [
+    """I am hiring for Java developers who can also collaborate effectively with my business teams. Looking for an assessment(s) that can be completed in 40 minutes.""",
+    
+    """We're looking for a Marketing Manager who can drive Recro’s brand positioning, community growth, and overall marketing strategy to fuel business growth. The ideal candidate is a strategic thinker, an execution-focused leader, and an expert in building high-performing marketing teams.
+
+About Recro 
+
+Recro is a developer-focused platform that was founded to match individual expertise with the right opportunities seamlessly. We empower talented developers by providing them with relevant experience at fast-growing startups based on technical competencies and aspirations. These opportunities have a significant impact on their career success and help them become their best self.
+
+About The Role
+
+Develop and execute Recro’s marketing strategy to enhance community engagement, brand positioning, and industry presence.
+Lead the marketing team and oversee all functions, with a strong focus on community building, events, brand positioning, social media engagement, and market intelligence.
+Drive demand generation by leveraging community-driven initiatives, influencer partnerships, and strategic event participation.
+Organize and represent Recro at industry conferences, networking events, and developer meetups to strengthen brand positioning.
+Build and nurture relationships with industry influencers, developer communities, and partners to create brand advocates.
+Own the marketing funnel, ensuring continuous tracking, analysis, and optimization of community engagement and event performance.
+Collaborate with sales, business development, and leadership teams to align marketing strategies with business objectives and market trends.
+Manage marketing budgets, prioritizing event sponsorships, partnerships, and community-driven growth initiatives.
+Develop compelling content strategies to drive community interaction and thought leadership.
+Stay ahead of industry trends, competitor movements, and emerging social and market intelligence to maintain a competitive edge
+
+Requirements
+
+5+ years of experience in B2B marketing with a strong focus on community building, events, and brand positioning.
+Has a deep understanding how demand generation works from traditional and new age channels
+Proven track record of executing large-scale events and community-driven initiatives.
+Experience in developing partnerships with industry influencers and thought leaders.
+Strong understanding of social media dynamics and community engagement strategies.
+Ability to leverage market intelligence and competitor insights to refine marketing strategies.
+Exceptional storytelling and brand communication skills.
+Hands-on experience with event management, sponsorships, and partnership collaborations.
+Experience in building a thriving developer or tech community is a plus.
+Open for flexible work timings as per target geographies.
+
+I have no bar on duration.""",
+
+"""ICICI Bank Assistant Admin, Experience required 0-2 years, test should be 30-40 mins long"""
+]
+
+# 2. --- Session State Initialization ---
+# This remembers which example we're on, even when the app re-runs
+if 'example_index' not in st.session_state:
+    st.session_state.example_index = 0
+
+# 3. --- Callback Function ---
+# This function runs when the "Add Example" button is clicked
+def cycle_examples():
+    # Set the text area's content to the *current* example
+    # We use a 'key' ("query_input") on the text_area to set its value
+    st.session_state.query_input = EXAMPLES[st.session_state.example_index]
+    
+    # Increment and wrap the index for the *next* click
+    st.session_state.example_index = (st.session_state.example_index + 1) % len(EXAMPLES)
+
 # --- Page Configuration ---
 st.set_page_config(
     page_title="SHL Assessment Recommender",
@@ -9,35 +66,50 @@ st.set_page_config(
 )
 
 # --- Configuration ---
-API_URL = "https://rag-webscrape.onrender.com/recommend" 
+API_URL = "https.rag-webscrape.onrender.com/recommend" 
 
 # --- Custom CSS Styling ---
 SHL_TEAL = "#00a99d"
+# ... (rest of CSS is unchanged) ...
 SHL_LIGHT_GREY = "#f4f4f4"
 OFF_WHITE = "#fafafa" 
 LIGHT_GREEN_FADE = "#a3dcbb" 
 
 st.markdown(f"""
 <style>
+/* --- DARK MODE FIX (START) --- */
 :root {{
     color-scheme: light !important;
 }}
 
+/* Set a base background color for html/body (as a fallback) */
 html, body {{
     background-color: {OFF_WHITE} !important;
     color: #000000 !important;
 }}
 
+/* Force specific text elements to be black */
 h1, h2, h3, label, .stMarkdown p {{
     color: #000000 !important;
 }}
 
+/* Force text inputs to have a light background and dark text */
 .stTextInput > div > div > input, 
 .stTextArea > div > textarea {{
     background-color: #ffffff !important;
     color: #000000 !important;
     border: 1px solid #cccccc !important;
 }}
+
+/* 1. Added rule for st.spinner text */
+[data-testid="stSpinner"] > div {{
+    color: #000000 !important;
+}}
+/* --- DARK MODE FIX (END) --- */
+
+
+/* --- GRADIENT BACKGROUND --- */
+/* This is the main app container. We apply the gradient to it. */
 .stApp {{
     background-image: linear-gradient(to bottom, {OFF_WHITE} 50%, {LIGHT_GREEN_FADE} 100%) !important;
     background-attachment: fixed !important;
@@ -45,17 +117,19 @@ h1, h2, h3, label, .stMarkdown p {{
     padding-bottom: 70px !important;
 }}
 
+/* *** THE KEY FIX IS HERE ***
   Streamlit puts content inside containers (like stAppViewContainer and main).
   We must make THESE containers transparent so the .stApp gradient behind them shows through.
 */
 [class*="stAppViewContainer"], [class*="main"] {{
     background: transparent !important; 
 }}
-
+/* --- END OF KEY FIX --- */
 
 
 .header {{
     width: 100%;
+# ... (rest of your CSS is unchanged) ...
     padding: 10px 0;
     margin-bottom: 20px;
     display: flex;
@@ -159,69 +233,90 @@ st.markdown("""
 
 # --- Frontend Application ---
 st.title("Assessment Recommendation System")
+
+# 4. --- Updated Text Area ---
+# We add a 'key' here so the callback function can update its value
 query = st.text_area(
     "Enter a job description or query:",
-    placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'"
+    placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'",
+    key="query_input" # This key links to st.session_state.query_input
 )
 
-if st.button("Get Recommendations"):
-    if not query.strip():
-        st.warning("Please enter a query or job description.")
-    else:
-        with st.spinner("Analyzing your query and finding assessments..."):
-            try:
-                # --- API Call ---
-                payload = {"query": query}
-                response = requests.post(API_URL, json=payload)
+# 5. --- Button Layout ---
+# We create columns to place the buttons side-by-side
+col1, col2 = st.columns([4, 1]) # Main button gets 4/5 of the space
 
-                if response.status_code == 200:
-                    data = response.json()
-                    recommendations = data.get("recommendations", [])
+with col1:
+    # 6. --- Main Button ---
+    # The logic inside this 'if' block is UNCHANGED.
+    # It now just sits inside a column.
+    if st.button("Get Recommendations", use_container_width=True):
+        if not query.strip():
+            st.warning("Please enter a query or job description.")
+        else:
+            with st.spinner("Analyzing your query and finding assessments..."):
+                try:
+                    # --- API Call ---
+                    payload = {"query": query} # 'query' var still works!
+                    response = requests.post(API_URL, json=payload)
 
-                    if not recommendations:
+                    if response.status_code == 200:
+                        data = response.json()
+                        recommendations = data.get("recommendations", [])
+
+                        if not recommendations:
+                            st.info("No recommendations found for this query.")
+                        else:
+                            st.subheader("Recommended Assessments")
+                            
+                            # Loop over recommendations and display in custom cards
+                            for rec in recommendations:
+                                name = rec.get("name", "Name not available")
+                                url = rec.get("url", "URL not found")
+                                duration = rec.get("duration", "N/A") 
+                                test_type = rec.get("test_type", "N/A")
+
+                                # HTML for the custom card
+                                card_html = f"""
+                                <div class="card">
+                                    <div class="card-title">{name}</div>
+                                    <div class="card-details">
+                                        Test Duration(min) = {duration} | Test Type = {test_type}
+                                    </div>
+                                    <div class="card-link">
+                                        <a href="{url}" target="_blank">Link for Assessment</a>
+                                    </div>
+                                </div>
+                                """
+                                st.markdown(card_html, unsafe_allow_html=True)
+                    
+                    elif response.status_code == 404:
                         st.info("No recommendations found for this query.")
                     else:
-                        st.subheader("Recommended Assessments")
-                        
-                        # Loop over recommendations and display in custom cards
-                        for rec in recommendations:
-                            name = rec.get("name", "Name not available")
-                            url = rec.get("url", "URL not found")
-                            duration = rec.get("duration", "N/A") 
-                            test_type = rec.get("test_type", "N/A")
-
-                            # HTML for the custom card
-                            card_html = f"""
-                            <div class="card">
-                                <div class="card-title">{name}</div>
-                                <div class="card-details">
-                                    Test Duration(min) = {duration} | Test Type = {test_type}
-                                </div>
-                                <div class="card-link">
-                                    <a href="{url}" target="_blank">Link for Assessment</a>
-                                </div>
-                            </div>
-                            """
-                            st.markdown(card_html, unsafe_allow_html=True)
+                        # Show a more detailed error from the API
+                        error_detail = "Unknown error"
+                        try:
+                            error_detail = response.json().get("detail", "Unknown error")
+                        except json.JSONDecodeError:
+                            error_detail = response.text # Show raw text if not JSON
+                        st.error(f"Error from API: {error_detail} (Code: {response.status_code})")
                 
-                elif response.status_code == 404:
-                    st.info("No recommendations found for this query.")
-                else:
-                    # Show a more detailed error from the API
-                    error_detail = "Unknown error"
-                    try:
-                        error_detail = response.json().get("detail", "Unknown error")
-                    except json.JSONDecodeError:
-                        error_detail = response.text # Show raw text if not JSON
-                    st.error(f"Error from API: {error_detail} (Code: {response.status_code})")
-            
-            except requests.exceptions.ConnectionError:
-                st.error(
-                    "Connection Error: Could not connect to the backend API. "
-                    f"Is it running at `{API_URL}`?"
-                )
-            except Exception as e:
-                st.error(f"An unexpected error occurred: {e}")
+                except requests.exceptions.ConnectionError:
+                    st.error(
+                        "Connection Error: Could not connect to the backend API. "
+                        f"Is it running at `{API_URL}`?"
+                    )
+                except Exception as e:
+                    st.error(f"An unexpected error occurred: {e}")
+
+with col2:
+    # 7. --- "Add Example" Button ---
+    # This button calls the 'cycle_examples' function when clicked
+    st.button(
+        "Add Example", 
+        on_click=cycle_examples, 
+        use_container_width=True
+    )
 
 # --- Footer ---
 st.markdown("""
