@@ -1,10 +1,11 @@
 import streamlit as st
 import requests
 import json
-import time
 
+# 1. --- Examples List ---
 EXAMPLES = [
     """I am hiring for Java developers who can also collaborate effectively with my business teams. Looking for an assessment(s) that can be completed in 40 minutes.""",
+    
     """We're looking for a Marketing Manager who can drive Recro’s brand positioning, community growth, and overall marketing strategy to fuel business growth. The ideal candidate is a strategic thinker, an execution-focused leader, and an expert in building high-performing marketing teams.
 
 About Recro 
@@ -38,83 +39,91 @@ Experience in building a thriving developer or tech community is a plus.
 Open for flexible work timings as per target geographies.
 
 I have no bar on duration.""",
-    """ICICI Bank Assistant Admin, Experience required 0-2 years, test should be 30-40 mins long"""
+
+"""ICICI Bank Assistant Admin, Experience required 0-2 years, test should be 30-40 mins long"""
 ]
 
+# 2. --- Session State Initialization ---
+# This remembers which example we're on, even when the app re-runs
 if 'example_index' not in st.session_state:
     st.session_state.example_index = 0
-if 'recommendations' not in st.session_state:
-    st.session_state.recommendations = []
-if 'info_message' not in st.session_state:
-    st.session_state.info_message = ""
-if 'error_message' not in st.session_state:
-    st.session_state.error_message = ""
 
+# 3. --- Callback Function ---
 def cycle_examples():
     st.session_state.query_input = EXAMPLES[st.session_state.example_index]
     st.session_state.example_index = (st.session_state.example_index + 1) % len(EXAMPLES)
 
+# --- Page Configuration ---
 st.set_page_config(
     page_title="SHL Assessment Recommender",
-    layout="wide"
+    layout="wide" 
 )
 
-API_URL = "https://rag-webscrape.onrender.com/recommend"
+# --- Configuration ---
+API_URL = "https://rag-webscrape.onrender.com/recommend" 
 
+# --- Custom CSS Styling ---
 SHL_TEAL = "#00a99d"
+# ... (rest of CSS is unchanged) ...
 SHL_LIGHT_GREY = "#f4f4f4"
-OFF_WHITE = "#fafafa"
-LIGHT_GREEN_FADE = "#a3dcbb"
-
-def safe_api_request(payload, retries=2, delay=10):
-    for attempt in range(retries):
-        try:
-            response = requests.post(API_URL, json=payload, timeout=30)
-            if response.status_code == 200:
-                return response
-            elif response.status_code in [502, 504]:
-                time.sleep(delay)
-            else:
-                return response
-        except requests.exceptions.RequestException:
-            if attempt < retries - 1:
-                time.sleep(delay)
-            else:
-                raise
-    return None
+OFF_WHITE = "#fafafa" 
+LIGHT_GREEN_FADE = "#a3dcbb" 
 
 st.markdown(f"""
 <style>
+/* --- DARK MODE FIX (START) --- */
 :root {{
     color-scheme: light !important;
 }}
+
+/* Set a base background color for html/body (as a fallback) */
 html, body {{
     background-color: {OFF_WHITE} !important;
     color: #000000 !important;
 }}
+
+/* Force specific text elements to be black */
 h1, h2, h3, label, .stMarkdown p {{
     color: #000000 !important;
 }}
+
+/* Force text inputs to have a light background and dark text */
 .stTextInput > div > div > input, 
 .stTextArea > div > textarea {{
     background-color: #ffffff !important;
     color: #000000 !important;
     border: 1px solid #cccccc !important;
 }}
+
+/* 1. Added rule for st.spinner text */
 [data-testid="stSpinner"] > div {{
     color: #000000 !important;
 }}
+/* --- DARK MODE FIX (END) --- */
+
+
+/* --- GRADIENT BACKGROUND --- */
+/* This is the main app container. We apply the gradient to it. */
 .stApp {{
     background-image: linear-gradient(to bottom, {OFF_WHITE} 50%, {LIGHT_GREEN_FADE} 100%) !important;
     background-attachment: fixed !important;
     background-size: cover !important;
     padding-bottom: 70px !important;
 }}
+
+/* *** THE KEY FIX IS HERE ***
+  Streamlit puts content inside containers (like stAppViewContainer and main).
+  We must make THESE containers transparent so the .stApp gradient behind them shows through.
+*/
 [class*="stAppViewContainer"], [class*="main"] {{
     background: transparent !important; 
 }}
+/* --- END OF KEY FIX --- */
+
+
 .header {{
     width: 100%;
+# ... (rest of your CSS is unchanged) ...
     padding: 10px 0;
     margin-bottom: 20px;
     display: flex;
@@ -175,7 +184,6 @@ h1, h2, h3, label, .stMarkdown p {{
     margin-bottom: 12px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     border: 1px solid #e0e0e0;
-    height: 100%;
 }}
 .card-title {{
     font-size: 1.25em;
@@ -200,6 +208,7 @@ h1, h2, h3, label, .stMarkdown p {{
 </style>
 """, unsafe_allow_html=True)
 
+# --- Header ---
 st.markdown("""
 <div class="header">
     <div class="header-name">Abhinav Tyagi - abhinavty753@gmail.com</div>
@@ -214,79 +223,96 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+
+# --- Frontend Application ---
 st.title("Assessment Recommendation System")
 
+# 4. --- Updated Text Area ---
+# We add a 'key' here so the callback function can update its value
 query = st.text_area(
     "Enter a job description or query:",
     placeholder="e.g., 'I am hiring for Java developers who can also collaborate effectively with my business teams.'",
-    key="query_input"
+    key="query_input" # This key links to st.session_state.query_input
 )
 
-col1, col2, _ = st.columns([2, 1, 3])
+# 5. --- Button Layout ---
+# We create columns to place the buttons side-by-side
+# Ratios: 2 for main button, 1 for example button, 3 for empty spacer
+col1, col2, _ = st.columns([2, 1, 3]) 
 
 with col1:
+    # 6. --- Main Button ---
+    # The logic inside this 'if' block is UNCHANGED.
+    # It now just sits inside a column.
     if st.button("Get Recommendations", use_container_width=True):
-        st.session_state.recommendations = []
-        st.session_state.info_message = ""
-        st.session_state.error_message = ""
-        
         if not query.strip():
             st.warning("Please enter a query or job description.")
         else:
-            with st.spinner("Analyzing your query and finding assessments...(might take around 20-30s on first load)"):
+            with st.spinner("Analyzing your query and finding assessments..."):
                 try:
-                    payload = {"query": query}
-                    response = safe_api_request(payload)
-                    if response and response.status_code == 200:
+                    # --- API Call ---
+                    payload = {"query": query} # 'query' var still works!
+                    response = requests.post(API_URL, json=payload)
+
+                    if response.status_code == 200:
                         data = response.json()
-                        st.session_state.recommendations = data.get("recommendations", [])
-                        if not st.session_state.recommendations:
-                            st.session_state.info_message = "No recommendations found for this query."
-                    elif response and response.status_code == 404:
-                        st.session_state.info_message = "No recommendations found for this query."
-                    elif not response:
-                        st.session_state.error_message = "Server did not respond. Please retry after a few seconds."
+                        recommendations = data.get("recommendations", [])
+
+                        if not recommendations:
+                            st.info("No recommendations found for this query.")
+                        else:
+                            st.subheader("Recommended Assessments")
+                            
+                            # Loop over recommendations and display in custom cards
+                            for rec in recommendations:
+                                name = rec.get("name", "Name not available")
+                                url = rec.get("url", "URL not found")
+                                duration = rec.get("duration", "N/A") 
+                                test_type = rec.get("test_type", "N/A")
+
+                                # HTML for the custom card
+                                card_html = f"""
+                                <div class="card">
+                                    <div class="card-title">{name}</div>
+                                    <div class="card-details">
+                                        Test Duration(min) = {duration} | Test Type = {test_type}
+                                    </div>
+                                    <div class="card-link">
+                                        <a href="{url}" target="_blank">Link for Assessment</a>
+                                    </div>
+                                </div>
+                                """
+                                st.markdown(card_html, unsafe_allow_html=True)
+                    
+                    elif response.status_code == 404:
+                        st.info("No recommendations found for this query.")
                     else:
-                        st.session_state.error_message = f"Error from API: {response.text} (Code: {response.status_code})"
+                        # Show a more detailed error from the API
+                        error_detail = "Unknown error"
+                        try:
+                            error_detail = response.json().get("detail", "Unknown error")
+                        except json.JSONDecodeError:
+                            error_detail = response.text # Show raw text if not JSON
+                        st.error(f"Error from API: {error_detail} (Code: {response.status_code})")
+                
                 except requests.exceptions.ConnectionError:
-                    st.session_state.error_message = f"Connection Error: Could not connect to `{API_URL}`."
+                    st.error(
+                        "Connection Error: Could not connect to the backend API. "
+                        f"Is it running at `{API_URL}`?"
+                    )
                 except Exception as e:
-                    st.session_state.error_message = f"An unexpected error occurred: {e}"
+                    st.error(f"An unexpected error occurred: {e}")
 
 with col2:
-    st.button("Add Example", on_click=cycle_examples, use_container_width=True)
+    # 7. --- "Add Example" Button ---
+    # This button calls the 'cycle_examples' function when clicked
+    st.button(
+        "Add Example", 
+        on_click=cycle_examples, 
+        use_container_width=True
+    )
 
-if st.session_state.recommendations:
-    recommendation_count = len(st.session_state.recommendations)
-    st.subheader(f"Recommended Assessments ({recommendation_count})")
-    col1_rec, col2_rec, col3_rec = st.columns(3)
-    for index, rec in enumerate(st.session_state.recommendations):
-        name = rec.get("name", "Name not available")
-        url = rec.get("url", "URL not found")
-        duration = rec.get("duration", "N/A")
-        test_type = rec.get("test_type", "N/A")
-        card_html = f"""
-        <div class="card">
-            <div class="card-title">{name}</div>
-            <div class="card-details">
-                Test Duration(min) = {duration} | Test Type = {test_type}
-            </div>
-            <div class="card-link">
-                <a href="{url}" target="_blank">Link for Assessment</a>
-            </div>
-        </div>
-        """
-        if index % 3 == 0:
-            col1_rec.markdown(card_html, unsafe_allow_html=True)
-        elif index % 3 == 1:
-            col2_rec.markdown(card_html, unsafe_allow_html=True)
-        else:
-            col3_rec.markdown(card_html, unsafe_allow_html=True)
-elif st.session_state.info_message:
-    st.info(st.session_state.info_message)
-elif st.session_state.error_message:
-    st.error(st.session_state.error_message)
-
+# --- Footer ---
 st.markdown("""
 <div class="footer">
     SHL Assessment Recommender | Built with coffee ;)
