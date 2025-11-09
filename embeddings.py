@@ -16,7 +16,6 @@ JSON_PATH = "data/assessments.json"
 PERSIST_DIR = "./chroma_db"
 COLLECTION_NAME = "shl_assessments"
 
-
 def parse_duration_min(duration_str: str):
     if not duration_str:
         return None
@@ -88,7 +87,7 @@ def main():
     print("Loading embedding model (all-MiniLM-L6-v2)...")
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
 
-    client = client = chromadb.PersistentClient(path=PERSIST_DIR)
+    client = chromadb.PersistentClient(path=PERSIST_DIR)
 
     try:
         collection = client.get_collection(COLLECTION_NAME)
