@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import chromadb
 from chromadb.config import Settings
 import google.generativeai as genai
+from typing import Tuple
 
 PERSIST_DIR = "./chroma_db"
 COLLECTION_NAME = "shl_assessments"
@@ -141,7 +142,7 @@ class AssessmentRAG:
         return clauses[0] if len(clauses) == 1 else {"$and": clauses}
 
     # ---------- Retrieval ----------
-    def retrieve(self, query: str, n_results: int = 40) -> (Dict, List[Dict]):
+    def retrieve(self, query: str, n_results: int = 40) -> Tuple[Dict, List[Dict]]:
         parsed = self.parse_query_with_llm(query)
         search_text = parsed.get("enhanced_query") or query
         where = self.build_where_filter(parsed)
