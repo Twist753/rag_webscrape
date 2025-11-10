@@ -218,7 +218,7 @@ with col1:
         if not query.strip():
             st.warning("Please enter a query or job description.")
         else:
-            with st.spinner("Analyzing your query and finding assessments...(might take around 20-30s on first load)"):
+            with st.spinner("Analyzing your query and finding assessments...(might take around 1min on first load due to cold start)"):
                 try:
                     payload = {"query": query} 
                     response = requests.post(API_URL, json=payload)
