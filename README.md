@@ -308,6 +308,10 @@ fetch('https://rag-webscrape.onrender.com/recommend', {
 - Job level boosting for relevance
 - Balanced recommendation across test types
 
+### Webpage view
+
+<img width="1919" height="865" alt="Screenshot 2025-11-10 111607" src="https://github.com/user-attachments/assets/d80ff3fe-5753-475e-b4f7-59f19bb4a71f" />
+
 ## Contact
 
 **Abhinav Tyagi**
@@ -322,3 +326,4 @@ This project is part of an assessment submission for SHL.
 ---
 
 **Built with lots of coffee by Abhinav Tyagi :)**
+
